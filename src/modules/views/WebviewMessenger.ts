@@ -21,7 +21,7 @@ export interface WebviewMessengerHandlers {
 export class WebviewMessenger {
     private view: vscode.WebviewView | undefined
     private ready = false
-    private isNewPromptPending = false
+    private isCreatePending = false
 
     constructor(private readonly extensionUri: vscode.Uri) {}
 
@@ -39,7 +39,7 @@ export class WebviewMessenger {
     attach(view: vscode.WebviewView, handlers: WebviewMessengerHandlers): void {
         this.view = view
         this.ready = false
-        this.isNewPromptPending = false
+        this.isCreatePending = false
         view.webview.options = {
             enableScripts: true,
             localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview')],
@@ -51,7 +51,7 @@ export class WebviewMessenger {
         view.onDidDispose(() => {
             this.view = undefined
             this.ready = false
-            this.isNewPromptPending = false
+            this.isCreatePending = false
             handlers.onDispose()
         })
         view.onDidChangeVisibility(() => {
@@ -66,20 +66,20 @@ export class WebviewMessenger {
 
     /** 补发握手前登记的新建编辑器请求；无挂起时什么也不做 */
     async flushPending(): Promise<void> {
-        if (!this.isNewPromptPending) {
+        if (!this.isCreatePending) {
             return
         }
-        this.isNewPromptPending = false
-        await this.post({ type: 'editPrompt' })
+        this.isCreatePending = false
+        await this.post({ type: 'requestCreate' })
     }
 
     /** 请求打开新建编辑器：未握手时先登记，等 ready 后补发，否则消息会被静默丢弃 */
-    async openNewPrompt(): Promise<void> {
+    async requestCreate(): Promise<void> {
         if (!this.view || !this.ready) {
-            this.isNewPromptPending = true
+            this.isCreatePending = true
             return
         }
-        await this.post({ type: 'editPrompt' })
+        await this.post({ type: 'requestCreate' })
     }
 
     /** 下发消息；视图不存在时静默丢弃 */

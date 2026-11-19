@@ -1,5 +1,5 @@
 /**
- * 面板头部的连接状态指示：图标 + Tooltip 文案，只负责呈现。
+ * 提示词标题区的连接状态指示：图标 + Tooltip 文案，只负责呈现。
  * tone 语义由 lib/connection-state 的纯函数产出，颜色映射留在本组件的模块级常量里，
  * 样式令牌调整因此不必回改领域逻辑。
  * 注意：Tooltip 的 Provider 由 main.tsx 统一提供，本组件不重复包裹；
@@ -18,13 +18,13 @@ const CONNECTION_ICON_CLASS: Record<ConnectionTone, string> = {
     missing: 'text-destructive-foreground',
 }
 
-interface PanelHeaderConnectionProps {
+interface PromptHeaderConnectionProps {
     tone: ConnectionTone
     /** Tooltip 文案，由 describeConnection 产出 */
     text: string
 }
 
-export function PanelHeaderConnection({ tone, text }: PanelHeaderConnectionProps): JSX.Element {
+export function PromptHeaderConnection({ tone, text }: PromptHeaderConnectionProps): JSX.Element {
     const tooltip = useAutoDismissTooltip()
 
     return (

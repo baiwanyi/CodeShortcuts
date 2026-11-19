@@ -1,11 +1,12 @@
 /**
- * 面板底部的工具分区：与提示词列表分开，固定在面板下沿。
- * 分区定位参考现有视觉顺序——提示词在上滚动，环境维护动作在下常驻，列表滚动时工具项不随之移动。
- * 注意：没有工具项时整块不渲染，避免在列表下方留一条孤立的分隔线；
- * 左右内距与 PromptList 的 px-3 对齐，保证两类条目的边缘齐平。
+ * 环境维护工具分区：按宿主下发的顺序渲染为可滚动列表。
+ * 列表自身接管滚动容器，调用方无需再包裹 ScrollArea；没有工具项时整块不渲染，
+ * 避免在分区里留下空白滚动区。
+ * 注意：滚动区域独占剩余高度；左右内距与 PromptList 的 px-3 对齐，保证两类条目的边缘齐平。
  */
 import { ToolItem } from '@components/ToolItem'
 import { ItemGroup } from '@components/ui/item'
+import { ScrollArea } from '@components/ui/scroll-area'
 import type { ToolActionId, ToolActionInfo } from '@shared/types'
 import type { JSX } from 'react'
 
@@ -21,10 +22,12 @@ export function ToolList({ tools, onRun }: ToolListProps): JSX.Element | null {
     }
 
     return (
-        <ItemGroup className="shrink-0 p-3 gap-2">
-            {tools.map((tool) => (
-                <ToolItem key={tool.id} tool={tool} onRun={onRun} />
-            ))}
-        </ItemGroup>
+        <ScrollArea className="min-h-0 flex-1 p-3">
+            <ItemGroup className="gap-2">
+                {tools.map((tool) => (
+                    <ToolItem key={tool.id} tool={tool} onRun={onRun} />
+                ))}
+            </ItemGroup>
+        </ScrollArea>
     )
 }

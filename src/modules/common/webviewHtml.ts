@@ -22,7 +22,7 @@ export async function buildWebviewHtml(webview: vscode.Webview, extensionUri: vs
     const distDir = vscode.Uri.joinPath(extensionUri, 'dist', 'webview')
     const template = await fs.readFile(path.join(distDir.fsPath, 'index.html'), 'utf-8')
     const assetBase = webview.asWebviewUri(vscode.Uri.joinPath(distDir, ASSET_DIR)).toString()
-    // 图片只放行 webview 自身资源与 data URI：面板内没有远程图片，放开 https: 等于允许加载任意外链图
+    // 图片只放行 webview 自身资源与 data URI：收藏图标来自 lucide 组件，面板不加载任何远程图片
     const csp = [
         "default-src 'none'",
         `img-src ${webview.cspSource} data:`,
@@ -59,7 +59,7 @@ export async function buildWebviewHtml(webview: vscode.Webview, extensionUri: vs
  * 错误信息可能带尖括号或引号，拼进文本节点前必须先转义。
  */
 export function buildFallbackHtml(reason: string): string {
-    return `<!doctype html><html><body><h3>提示词快捷方式</h3><p>Webview 资源缺失，请先执行 pnpm run compile（${escapeHtml(reason)}）</p></body></html>`
+    return `<!doctype html><html><body><h3>CodeShortcuts</h3><p>Webview 资源缺失，请先执行 pnpm run compile（${escapeHtml(reason)}）</p></body></html>`
 }
 
 /** 最小 HTML 转义：只覆盖会破坏文本节点的四个字符，兜底页面无需完整实体表 */

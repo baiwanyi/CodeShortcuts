@@ -6,6 +6,7 @@
  * 配置项统一通过 config 模块的 resolveBridgeConfig 读取，避免各处散落默认值导致行为不一致。
  */
 import * as vscode from 'vscode'
+import { BOOKMARK_STORAGE_KEY, BookmarkStore } from './modules/bookmark/BookmarkStore'
 import { CodeBuddyBridge } from './modules/codebuddy/CodeBuddyBridge'
 import { resolveBridgeConfig } from './modules/codebuddy/config'
 import { registerContextActions } from './modules/commands/contextActions'
@@ -19,11 +20,44 @@ import { PromptSidebarProvider } from './modules/views/PromptSidebarProvider'
 import { isRecord } from './shared/guards'
 import type { FeedbackLevel } from './modules/common/notify'
 
-const SIDEBAR_VIEW_ID = 'baiwanyi.prompt.sidebar'
-const SIDEBAR_CONTAINER_ID = 'baiwanyi.prompt'
+const SIDEBAR_VIEW_ID = 'codeshortcuts-prompt-sidebar'
+const SIDEBAR_CONTAINER_ID = 'codeshortcuts-prompt'
 
 /** 已提示过的版本：同一版本只提醒一次，避免每次重载窗口都弹窗 */
-const LAST_NOTIFIED_KEY = 'baiwanyi.prompt.update.lastNotifiedVersion'
+const LAST_NOTIFIED_KEY = 'codeshortcuts.prompt.update.lastNotifiedVersion'
+
+/** 品牌统一前的旧键：仅为一次性清除而保留字面量，新代码不得再读取 */
+const LEGACY_STORAGE_KEYS = [
+    'baiwanyi.prompt.templates.v1',
+    'baiwanyi.prompt.bookmarks.v1',
+    'baiwanyi.prompt.update.lastNotifiedVersion',
+] as const
+
+const LEGACY_CONFIG_KEYS = [
+    'baiwanyi.prompt.codebuddy.reuseConversation',
+    'baiwanyi.prompt.codebuddy.sendCommand',
+    'baiwanyi.prompt.codebuddy.newChatCommand',
+    'baiwanyi.prompt.codebuddy.mode',
+    'baiwanyi.prompt.codebuddy.autoSend',
+    'baiwanyi.prompt.codebuddy.fallbackToClipboard',
+    'baiwanyi.prompt.update.checkOnStartup',
+    'baiwanyi.prompt.update.manifestUrl',
+] as const
+
+/**
+ * 清除旧品牌前缀的配置与存储残留。
+ * 新键从默认值与空列表重新开始，旧数据不做迁移且不可恢复；
+ * 只清理用户级设置，不触碰工作区设置，避免影响其他项目。
+ */
+async function removeLegacySettings(context: vscode.ExtensionContext): Promise<void> {
+    for (const key of LEGACY_STORAGE_KEYS) {
+        await context.globalState.update(key, undefined)
+    }
+    const config = vscode.workspace.getConfiguration()
+    for (const key of LEGACY_CONFIG_KEYS) {
+        await config.update(key, undefined, vscode.ConfigurationTarget.Global)
+    }
+}
 
 /** 状态栏提示比弹窗更轻量，错误才升级为弹窗 */
 function notify(level: FeedbackLevel, message: string): void {
@@ -31,7 +65,7 @@ function notify(level: FeedbackLevel, message: string): void {
         void vscode.window.showErrorMessage(message)
         return
     }
-    vscode.window.setStatusBarMessage(`提示词快捷方式：${message}`, 4000)
+    vscode.window.setStatusBarMessage(`CodeShortcuts：${message}`, 4000)
 }
 
 /**
@@ -52,7 +86,7 @@ async function revealSidebar(): Promise<void> {
     } catch {
         // 两个入口都不可用：活动栏图标仍可手动展开，这里给出可操作提示而不是抛出内部命令名
         void vscode.window.showWarningMessage(
-            '无法自动展开提示词面板，请点击活动栏的「提示词快捷方式」图标；若图标缺失，请检查是否同时安装了旧版扩展。',
+            '无法自动展开提示词面板，请点击活动栏的「CodeShortcuts」图标；若图标缺失，请检查是否同时安装了旧版扩展。',
         )
     }
 }
@@ -72,7 +106,7 @@ async function checkUpdateOnStartup(context: vscode.ExtensionContext): Promise<v
     if (!settings.checkOnStartup || !settings.manifestUrl) {
         return
     }
-    const report = createReporter('提示词快捷方式 · 更新检查', (disposable): void => {
+    const report = createReporter('CodeShortcuts · 更新检查', (disposable): void => {
         context.subscriptions.push(disposable)
     })
     const localVersion = readLocalVersion(context)
@@ -86,7 +120,7 @@ async function checkUpdateOnStartup(context: vscode.ExtensionContext): Promise<v
     }
     await context.globalState.update(LAST_NOTIFIED_KEY, outcome.manifest.version)
     const choice = await vscode.window.showInformationMessage(
-        `提示词快捷方式有新版本 ${outcome.manifest.version}（当前 ${localVersion}）`,
+        `CodeShortcuts 有新版本 ${outcome.manifest.version}（当前 ${localVersion}）`,
         '前往下载',
     )
     if (choice === '前往下载') {
@@ -95,15 +129,17 @@ async function checkUpdateOnStartup(context: vscode.ExtensionContext): Promise<v
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-    // 登记同步键：用户开启 Settings Sync 后，提示词随设置一起在多台设备间同步
-    context.globalState.setKeysForSync([PROMPT_STORAGE_KEY])
+    void removeLegacySettings(context)
+    // 登记同步键：用户开启 Settings Sync 后，提示词与收藏夹随设置一起在多台设备间同步
+    context.globalState.setKeysForSync([BOOKMARK_STORAGE_KEY, PROMPT_STORAGE_KEY])
     // 预设模板来自 resources/prompts.md，只在存储尚无该键时写入一次
     const store = new PromptStore(context.globalState, loadPresets())
+    const bookmarkStore = new BookmarkStore(context.globalState)
     // 桥接层按需创建排障日志通道，释放动作统一挂到扩展上下文
     const bridge = new CodeBuddyBridge(resolveBridgeConfig, (disposable): void => {
         context.subscriptions.push(disposable)
     })
-    const provider = new PromptSidebarProvider(context.extensionUri, store, bridge)
+    const provider = new PromptSidebarProvider(context.extensionUri, store, bookmarkStore, bridge)
     // 登记同步键后同步口径即就绪，据此让面板以 toast 提醒一次（面板未打开时由 ready 握手补发）
     provider.announceSyncReady()
 
@@ -114,15 +150,15 @@ export function activate(context: vscode.ExtensionContext): void {
     )
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('baiwanyi.prompt.openSidebar', async () => {
+        vscode.commands.registerCommand('codeshortcuts.prompt.openSidebar', async () => {
             await revealSidebar()
             await provider.refresh()
         }),
-        vscode.commands.registerCommand('baiwanyi.prompt.create', async () => {
+        vscode.commands.registerCommand('codeshortcuts.prompt.create', async () => {
             await revealSidebar()
-            await provider.openEditorForNew()
+            await provider.requestCreate()
         }),
-        vscode.commands.registerCommand('baiwanyi.prompt.refresh', async () => {
+        vscode.commands.registerCommand('codeshortcuts.prompt.refresh', async () => {
             await provider.refresh()
         }),
     )
@@ -133,7 +169,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
     context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration((event) => {
-            if (event.affectsConfiguration('baiwanyi.prompt')) {
+            if (event.affectsConfiguration('codeshortcuts.prompt')) {
                 void provider.refresh()
             }
         }),

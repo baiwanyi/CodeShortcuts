@@ -35,9 +35,9 @@ function createBuilder(key: string): ActionPromptBuilder {
 }
 
 export const CONTEXT_ACTIONS: readonly ContextActionEntry[] = [
-    { command: 'baiwanyi.prompt.fixWithCodeBuddy', buildPrompt: createBuilder('fix') },
-    { command: 'baiwanyi.prompt.reviewWithCodeBuddy', buildPrompt: createBuilder('review'), mode: 'ask' },
-    { command: 'baiwanyi.prompt.optimizeWithCodeBuddy', buildPrompt: createBuilder('optimize'), mode: 'ask' },
-    { command: 'baiwanyi.prompt.styleWithCodeBuddy', buildPrompt: createBuilder('style') },
-    { command: 'baiwanyi.prompt.refactorWithCodeBuddy', buildPrompt: createBuilder('refactor'), mode: 'ask' },
+    { command: 'codeshortcuts.prompt.fixWithCodeBuddy', buildPrompt: createBuilder('fix') },
+    { command: 'codeshortcuts.prompt.reviewWithCodeBuddy', buildPrompt: createBuilder('review'), mode: 'ask' },
+    { command: 'codeshortcuts.prompt.optimizeWithCodeBuddy', buildPrompt: createBuilder('optimize') },
+    { command: 'codeshortcuts.prompt.styleWithCodeBuddy', buildPrompt: createBuilder('style') },
+    { command: 'codeshortcuts.prompt.refactorWithCodeBuddy', buildPrompt: createBuilder('refactor') },
 ]

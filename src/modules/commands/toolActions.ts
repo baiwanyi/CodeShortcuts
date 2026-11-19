@@ -21,7 +21,7 @@ export interface ToolActionEntry extends ToolActionInfo {
 export const TOOL_ACTIONS: readonly ToolActionEntry[] = [
     {
         id: 'reloadWindow',
-        command: 'baiwanyi.prompt.reloadWindow',
+        command: 'codeshortcuts.prompt.reloadWindow',
         label: '重载窗口',
         description: '重新加载 VS Code 窗口，用于扩展与设置异常时的复位',
         delegate: 'workbench.action.reloadWindow',
@@ -30,7 +30,7 @@ export const TOOL_ACTIONS: readonly ToolActionEntry[] = [
     },
     {
         id: 'restartEslint',
-        command: 'baiwanyi.prompt.restartEslint',
+        command: 'codeshortcuts.prompt.restartEslint',
         label: '重启 ESLint',
         description: '重启 ESLint 语言服务，让配置与依赖改动立即生效',
         delegate: 'eslint.restart',
@@ -38,7 +38,7 @@ export const TOOL_ACTIONS: readonly ToolActionEntry[] = [
     },
     {
         id: 'restartTsServer',
-        command: 'baiwanyi.prompt.restartTsServer',
+        command: 'codeshortcuts.prompt.restartTsServer',
         label: '重启 TS',
         description: '重启 TypeScript 语言服务，刷新类型检查与项目引用',
         delegate: 'typescript.restartTsServer',

@@ -11,10 +11,13 @@ import * as vscode from 'vscode'
 import { WebviewMessenger } from './WebviewMessenger'
 import type { HostToWebviewMessage, WebviewToHostMessage } from '../../shared/messages'
 import type { PromptDraft, PromptStatePayload, PromptTemplate } from '../../shared/types'
+import type { BookmarkStore } from '../bookmark/BookmarkStore'
 import type { CodeBuddyBridge } from '../codebuddy/CodeBuddyBridge'
 import type { PromptStore } from '../prompt/PromptStore'
+import { normalizeBookmarkUrl } from '../../shared/bookmarkValidation'
 import { describeError } from '../../shared/errors'
 import { checkCapacity, measurePromptsBytes } from '../../shared/promptCapacity'
+import { parseBookmarkDraft, validateBookmarkDraft } from '../bookmark/draft'
 import { CodeBuddyAvailabilityPoller } from '../codebuddy/CodeBuddyAvailabilityPoller'
 import { dispatchPrompt } from '../codebuddy/dispatchPrompt'
 import { runToolAction } from '../commands/runToolAction'
@@ -22,7 +25,7 @@ import { findToolAction, listToolActions } from '../commands/toolActions'
 import { parseDraft, resolveSendText, validateDraft } from '../prompt/draft'
 
 export class PromptSidebarProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = 'baiwanyi.prompt.sidebar'
+    public static readonly viewType = 'codeshortcuts-prompt-sidebar'
 
     /** 视图传输层：负责 HTML 装配、握手缓存与消息下发 */
     private readonly messenger: WebviewMessenger
@@ -36,6 +39,7 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
     constructor(
         extensionUri: vscode.Uri,
         private readonly store: PromptStore,
+        private readonly bookmarkStore: BookmarkStore,
         private readonly bridge: CodeBuddyBridge,
     ) {
         this.messenger = new WebviewMessenger(extensionUri)
@@ -71,9 +75,9 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
         })
     }
 
-    /** 让 Webview 打开编辑器并新建模板；未握手时由传输层缓存，ready 后补发 */
-    async openEditorForNew(): Promise<void> {
-        await this.messenger.openNewPrompt()
+    /** 请求 Webview 打开新建编辑器；新建类型由 Webview 按当前分区决定，未握手时由传输层缓存 */
+    async requestCreate(): Promise<void> {
+        await this.messenger.requestCreate()
     }
 
     /** 通知 Webview 刷新（重置等操作后） */
@@ -89,7 +93,7 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
         this.enqueueAfterReady({
             type: 'notify',
             level: 'info',
-            message: `设置同步已就绪，共 ${this.store.getAll().length} 条提示词同步成功。`,
+            message: `设置同步已就绪，共 ${this.store.getAll().length} 条提示词、${this.bookmarkStore.getAll().length} 个收藏。`,
         })
     }
 
@@ -140,6 +144,18 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
             }
             case 'runTool': {
                 await this.runToolById(message.id)
+                break
+            }
+            case 'openBookmark': {
+                await this.openBookmarkById(message.id)
+                break
+            }
+            case 'saveBookmark': {
+                await this.saveBookmark(message.draft)
+                break
+            }
+            case 'deleteBookmark': {
+                await this.deleteBookmarkById(message.id)
                 break
             }
             default: {
@@ -250,6 +266,56 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
         })
     }
 
+    /** 用 VS Code 内置的简单浏览器打开收藏：id 与网址都在宿主侧重新校验，命令不可用时给出明确提示 */
+    private async openBookmarkById(id: string): Promise<void> {
+        const target = this.bookmarkStore.get(id)
+        if (!target) {
+            await this.messenger.notify('warn', '收藏不存在或已被删除。')
+            return
+        }
+        const url = normalizeBookmarkUrl(target.url)
+        if (!url) {
+            await this.messenger.notify('error', '收藏的网址无效，请编辑后重试。')
+            return
+        }
+        try {
+            await vscode.commands.executeCommand('simpleBrowser.show', url)
+        } catch {
+            await this.messenger.notify('error', '无法打开 VS Code 内置浏览器，请确认简单浏览器功能可用。')
+        }
+    }
+
+    /** 保存收藏：先收敛不可信载荷，再做字段与协议校验，最后区分「新增 / 更新」提示 */
+    private async saveBookmark(raw: unknown): Promise<void> {
+        const draft = parseBookmarkDraft(raw)
+        if (!draft) {
+            await this.messenger.notify('error', '提交的内容格式不正确，请刷新面板后重试。')
+            return
+        }
+        const errors = validateBookmarkDraft(draft)
+        if (errors.length > 0) {
+            await this.messenger.notify('error', errors.join('；'))
+            return
+        }
+        const list = this.bookmarkStore.getAll()
+        const isExisting = draft.id !== undefined && list.some((item) => item.id === draft.id)
+        await this.bookmarkStore.save(draft)
+        await this.pushState()
+        await this.messenger.notify('info', isExisting ? '收藏已更新。' : '收藏已添加。')
+    }
+
+    /** 删除单条收藏：与提示词一样，删除后不再回灌 */
+    private async deleteBookmarkById(id: string): Promise<void> {
+        const target = this.bookmarkStore.get(id)
+        if (!target) {
+            await this.messenger.notify('warn', '收藏不存在或已被删除。')
+            return
+        }
+        await this.bookmarkStore.remove(id)
+        await this.pushState()
+        await this.messenger.notify('info', `已删除「${target.label}」。`)
+    }
+
     /** 发送并把结果反馈到面板：编排与右键命令共用 dispatchPrompt，这里只把 toast 通道适配进去 */
     private async dispatch(prompt: string, mode?: PromptDraft['mode']): Promise<void> {
         await dispatchPrompt(this.bridge, prompt, mode, (level, message): void => {
@@ -275,6 +341,7 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
             codebuddy: this.bridge.getStatus(commandId !== ''),
             // 工具条清单固定来自宿主表，Webview 只负责渲染，避免两侧各维护一份
             tools: listToolActions(),
+            bookmarks: this.bookmarkStore.getAll(),
         }
         await this.messenger.post({ type: 'state', payload })
         if (commandId !== '') {
@@ -286,7 +353,7 @@ export class PromptSidebarProvider implements vscode.WebviewViewProvider {
 
     /** 消息处理链路的兜底：详情只留下行日志，界面给可读提示，避免未捕获拒绝导致点击无反应 */
     private async reportUnexpectedError(error: unknown): Promise<void> {
-        console.error('[baiwanyi.prompt] 处理 Webview 消息失败：', describeError(error))
+        console.error('[codeshortcuts.prompt] 处理 Webview 消息失败：', describeError(error))
         await this.messenger.notify('error', '操作失败，请重试；若持续出现可重新加载窗口。')
     }
 }

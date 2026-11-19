@@ -72,6 +72,104 @@ export interface PromptDraft {
     mode: ChatMode
 }
 
+/** 收藏图标键：宿主只存字符串，Webview 侧映射到 lucide 组件 */
+export type BookmarkIconKey =
+    | 'globe'
+    | 'code'
+    | 'book'
+    | 'github'
+    | 'video'
+    | 'news'
+    | 'shopping'
+    | 'music'
+    | 'palette'
+    | 'work'
+    | 'star'
+    | 'heart'
+    | 'flame'
+    | 'zap'
+    | 'rocket'
+    | 'target'
+    | 'lightbulb'
+    | 'shield'
+    | 'cloud'
+    | 'compass'
+
+export const BOOKMARK_ICON_KEYS: readonly BookmarkIconKey[] = [
+    'globe',
+    'code',
+    'book',
+    'github',
+    'video',
+    'news',
+    'shopping',
+    'music',
+    'palette',
+    'work',
+    'star',
+    'heart',
+    'flame',
+    'zap',
+    'rocket',
+    'target',
+    'lightbulb',
+    'shield',
+    'cloud',
+    'compass',
+]
+
+/** 校验图标键取值：宿主读档、草稿收敛与 Webview 选项组共用同一份白名单 */
+export function isBookmarkIconKey(value: unknown): value is BookmarkIconKey {
+    return typeof value === 'string' && BOOKMARK_ICON_KEYS.some((key) => key === value)
+}
+
+/** 收藏背景色键：宿主只存字符串，Webview 侧映射到 Tailwind class */
+export type BookmarkColorKey =
+    'white' | 'gray' | 'black' | 'red' | 'orange' | 'yellow' | 'green' | 'cyan' | 'blue' | 'purple'
+
+export const BOOKMARK_COLOR_KEYS: readonly BookmarkColorKey[] = [
+    'white',
+    'gray',
+    'black',
+    'red',
+    'orange',
+    'yellow',
+    'green',
+    'cyan',
+    'blue',
+    'purple',
+]
+
+/** 校验背景色键取值：宿主读档与 Webview 选项组共用同一份白名单 */
+export function isBookmarkColorKey(value: unknown): value is BookmarkColorKey {
+    return typeof value === 'string' && BOOKMARK_COLOR_KEYS.some((key) => key === value)
+}
+
+/** 新建收藏的默认外观；历史数据缺字段时也回落到这一组 */
+export const DEFAULT_BOOKMARK_ICON: BookmarkIconKey = 'globe'
+export const DEFAULT_BOOKMARK_COLOR: BookmarkColorKey = 'white'
+
+/** 一条收藏网址：名称用于列表展示，url 已收敛为 http/https 绝对地址 */
+export interface Bookmark {
+    /** 稳定标识：打开、编辑与删除都按它定位 */
+    id: string
+    label: string
+    url: string
+    icon: BookmarkIconKey
+    color: BookmarkColorKey
+    createdAt: number
+    updatedAt: number
+}
+
+/** 新建或编辑收藏时提交给宿主的载荷（不含时间戳等派生字段） */
+export interface BookmarkDraft {
+    id?: string
+    label: string
+    url: string
+    icon: BookmarkIconKey
+    color: BookmarkColorKey
+}
+
 /**
  * CodeBuddy 集成状态，用于在面板顶部提示可用性。
  * 只暴露界面真正消费的两项：命令 ID 属内部通路细节，展示层不呈现，因此不进协议。
@@ -102,6 +200,8 @@ export interface PromptStatePayload {
     codebuddy: CodeBuddyStatus
     /** 追加在提示词列表末尾的工具动作，顺序由宿主决定 */
     tools: ToolActionInfo[]
+    /** 收藏网址，顺序以持久化数组为准 */
+    bookmarks: Bookmark[]
 }
 
 /** 发送结果，用于宿主内部决策是否走降级链路 */

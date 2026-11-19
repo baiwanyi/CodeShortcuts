@@ -1,18 +1,18 @@
 {
     "$schema": "https://json.schemastore.org/package.json",
-    "name": "prompt-shortcut",
-    "displayName": "Prompt Shortcut for VSCode",
-    "description": "CodeBuddy 代码开发提示词快捷方式",
-    "version": "0.1.4",
+    "name": "codeshortcuts",
+    "displayName": "CodeShortcuts for VSCode",
+    "description": "把常用提示词送达 CodeBuddy，把收藏网址与开发命令收进侧边栏",
+    "version": "0.1.5",
     "publisher": "Baiwanyi",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/baiwanyi/vscode-prompt-shortcut.git"
+        "url": "https://github.com/baiwanyi/CodeShortcuts.git"
     },
-    "homepage": "https://github.com/baiwanyi/vscode-prompt-shortcut#readme",
+    "homepage": "https://github.com/baiwanyi/CodeShortcuts#readme",
     "bugs": {
-        "url": "https://github.com/baiwanyi/vscode-prompt-shortcut/issues"
+        "url": "https://github.com/baiwanyi/CodeShortcuts/issues"
     },
     "private": true,
     "icon": "resources/icon.png",
@@ -36,75 +36,75 @@
     "contributes": {
         "commands": [
             {
-                "command": "baiwanyi.prompt.openSidebar",
+                "command": "codeshortcuts.prompt.openSidebar",
                 "title": "打开提示词面板",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(list-unordered)"
             },
             {
-                "command": "baiwanyi.prompt.create",
+                "command": "codeshortcuts.prompt.create",
                 "title": "新建提示词模板",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(add)"
             },
             {
-                "command": "baiwanyi.prompt.refresh",
+                "command": "codeshortcuts.prompt.refresh",
                 "title": "刷新提示词",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(refresh)"
             },
             {
-                "command": "baiwanyi.prompt.fixWithCodeBuddy",
+                "command": "codeshortcuts.prompt.fixWithCodeBuddy",
                 "title": "修复缺陷",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(wrench)"
             },
             {
-                "command": "baiwanyi.prompt.reviewWithCodeBuddy",
+                "command": "codeshortcuts.prompt.reviewWithCodeBuddy",
                 "title": "代码评审",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(shield)"
             },
             {
-                "command": "baiwanyi.prompt.optimizeWithCodeBuddy",
-                "title": "实现优化",
-                "category": "提示词快捷方式",
+                "command": "codeshortcuts.prompt.optimizeWithCodeBuddy",
+                "title": "优化代码",
+                "category": "CodeShortcuts",
                 "icon": "$(zap)"
             },
             {
-                "command": "baiwanyi.prompt.styleWithCodeBuddy",
+                "command": "codeshortcuts.prompt.styleWithCodeBuddy",
                 "title": "编码规范",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(checklist)"
             },
             {
-                "command": "baiwanyi.prompt.refactorWithCodeBuddy",
+                "command": "codeshortcuts.prompt.refactorWithCodeBuddy",
                 "title": "代码重构",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(symbol-structure)"
             },
             {
-                "command": "baiwanyi.prompt.restartEslint",
+                "command": "codeshortcuts.prompt.restartEslint",
                 "title": "重启 ESLint 服务",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(debug-restart)"
             },
             {
-                "command": "baiwanyi.prompt.restartTsServer",
+                "command": "codeshortcuts.prompt.restartTsServer",
                 "title": "重启 TS 服务",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(debug-restart)"
             },
             {
-                "command": "baiwanyi.prompt.reloadWindow",
+                "command": "codeshortcuts.prompt.reloadWindow",
                 "title": "重新加载窗口",
-                "category": "提示词快捷方式",
+                "category": "CodeShortcuts",
                 "icon": "$(refresh)"
             }
         ],
         "submenus": [
             {
-                "id": "baiwanyi.prompt.editorContext",
+                "id": "codeshortcuts-prompt-editor-context",
                 "label": "快捷命令",
                 "icon": "resources/icon.svg"
             }
@@ -112,61 +112,61 @@
         "menus": {
             "editor/context": [
                 {
-                    "submenu": "baiwanyi.prompt.editorContext",
+                    "submenu": "codeshortcuts-prompt-editor-context",
                     "when": "editorTextFocus",
                     "group": "0_a_quickcommand@1"
                 }
             ],
             "explorer/context": [
                 {
-                    "submenu": "baiwanyi.prompt.editorContext",
+                    "submenu": "codeshortcuts-prompt-editor-context",
                     "when": "resourceScheme == file && !explorerResourceIsFolder",
                     "group": "1_quickcommand@1"
                 }
             ],
-            "baiwanyi.prompt.editorContext": [
+            "codeshortcuts-prompt-editor-context": [
                 {
-                    "command": "baiwanyi.prompt.fixWithCodeBuddy",
+                    "command": "codeshortcuts.prompt.fixWithCodeBuddy",
                     "group": "1_quality@1"
                 },
                 {
-                    "command": "baiwanyi.prompt.reviewWithCodeBuddy",
+                    "command": "codeshortcuts.prompt.reviewWithCodeBuddy",
                     "group": "1_quality@2"
                 },
                 {
-                    "command": "baiwanyi.prompt.optimizeWithCodeBuddy",
+                    "command": "codeshortcuts.prompt.optimizeWithCodeBuddy",
                     "group": "1_quality@3"
                 },
                 {
-                    "command": "baiwanyi.prompt.styleWithCodeBuddy",
+                    "command": "codeshortcuts.prompt.styleWithCodeBuddy",
                     "group": "1_quality@4"
                 },
                 {
-                    "command": "baiwanyi.prompt.refactorWithCodeBuddy",
+                    "command": "codeshortcuts.prompt.refactorWithCodeBuddy",
                     "group": "2_structure@1"
                 },
                 {
-                    "command": "baiwanyi.prompt.restartEslint",
+                    "command": "codeshortcuts.prompt.restartEslint",
                     "group": "9_tools@1"
                 },
                 {
-                    "command": "baiwanyi.prompt.restartTsServer",
+                    "command": "codeshortcuts.prompt.restartTsServer",
                     "group": "9_tools@2"
                 },
                 {
-                    "command": "baiwanyi.prompt.reloadWindow",
+                    "command": "codeshortcuts.prompt.reloadWindow",
                     "group": "9_tools@3"
                 }
             ],
             "view/title": [
                 {
-                    "command": "baiwanyi.prompt.create",
-                    "when": "view == baiwanyi.prompt.sidebar",
+                    "command": "codeshortcuts.prompt.create",
+                    "when": "view == codeshortcuts-prompt-sidebar",
                     "group": "navigation@1"
                 },
                 {
-                    "command": "baiwanyi.prompt.refresh",
-                    "when": "view == baiwanyi.prompt.sidebar",
+                    "command": "codeshortcuts.prompt.refresh",
+                    "when": "view == codeshortcuts-prompt-sidebar",
                     "group": "navigation@2"
                 }
             ]
@@ -174,41 +174,41 @@
         "viewsContainers": {
             "activitybar": [
                 {
-                    "id": "baiwanyi.prompt",
-                    "title": "提示词快捷方式",
+                    "id": "codeshortcuts-prompt",
+                    "title": "CodeShortcuts",
                     "icon": "resources/icon.svg"
                 }
             ]
         },
         "views": {
-            "baiwanyi.prompt": [
+            "codeshortcuts-prompt": [
                 {
                     "type": "webview",
-                    "id": "baiwanyi.prompt.sidebar",
-                    "name": "提示词快捷方式",
+                    "id": "codeshortcuts-prompt-sidebar",
+                    "name": "CodeShortcuts",
                     "icon": "resources/icon.svg"
                 }
             ]
         },
         "configuration": {
-            "title": "提示词快捷方式",
+            "title": "CodeShortcuts",
             "properties": {
-                "baiwanyi.prompt.codebuddy.reuseConversation": {
+                "codeshortcuts.prompt.codebuddy.reuseConversation": {
                     "type": "boolean",
                     "default": true,
                     "markdownDescription": "是否把提示词发送到 CodeBuddy 的当前对话。开启后不再每次新建会话标签；关闭后每次点击都会新建会话。"
                 },
-                "baiwanyi.prompt.codebuddy.sendCommand": {
+                "codeshortcuts.prompt.codebuddy.sendCommand": {
                     "type": "string",
                     "default": "tencentcloud.codingcopilot.chat.sendMessage",
                     "markdownDescription": "复用当前对话时调用的命令 ID。默认使用 CodeBuddy 内置的 `chat.sendMessage`（发往当前会话，不新建会话）。若目标版本变更，可在此改为自定义命令。"
                 },
-                "baiwanyi.prompt.codebuddy.newChatCommand": {
+                "codeshortcuts.prompt.codebuddy.newChatCommand": {
                     "type": "string",
                     "default": "tencentcloud.codingcopilot.sendToChat",
                     "markdownDescription": "复用当前对话失败时用于新建会话的命令 ID。默认使用 CodeBuddy 内置的 `sendToChat`（新建对话并自动发送）。"
                 },
-                "baiwanyi.prompt.codebuddy.mode": {
+                "codeshortcuts.prompt.codebuddy.mode": {
                     "type": "string",
                     "enum": [
                         "craft",
@@ -218,22 +218,22 @@
                     "default": "craft",
                     "markdownDescription": "右键菜单动作未预设模式时使用的默认对话模式。侧边栏卡片始终按各自选定的模式发送，不受此项影响。"
                 },
-                "baiwanyi.prompt.codebuddy.autoSend": {
+                "codeshortcuts.prompt.codebuddy.autoSend": {
                     "type": "boolean",
                     "default": true,
                     "markdownDescription": "点击提示词后是否直接触发发送。关闭后仅将文本写入剪贴板并聚焦 CodeBuddy 对话框，由你手动粘贴发送。"
                 },
-                "baiwanyi.prompt.codebuddy.fallbackToClipboard": {
+                "codeshortcuts.prompt.codebuddy.fallbackToClipboard": {
                     "type": "boolean",
                     "default": true,
                     "markdownDescription": "当未检测到 CodeBuddy 扩展时，是否退化为「写入剪贴板 + 提示」。"
                 },
-                "baiwanyi.prompt.update.checkOnStartup": {
+                "codeshortcuts.prompt.update.checkOnStartup": {
                     "type": "boolean",
                     "default": false,
                     "markdownDescription": "是否在启动时检查自建清单里的新版本。市场安装的版本由 VS Code 自动更新，通常无需开启。"
                 },
-                "baiwanyi.prompt.update.manifestUrl": {
+                "codeshortcuts.prompt.update.manifestUrl": {
                     "type": "string",
                     "default": "",
                     "markdownDescription": "自建更新清单地址，需返回含 `version` 与 `url` 的 JSON（仅接受 https）。默认留空；仅在绕开市场分发（内网、离线镜像）时才需要填写。"
@@ -253,37 +253,37 @@
         "market": "node scripts/publish.mjs"
     },
     "devDependencies": {
-        "@eslint-react/eslint-plugin": "^5.28.8",
+        "@eslint-react/eslint-plugin": "^5.30.4",
         "@eslint/js": "^10.0.1",
-        "@tailwindcss/vite": "^4.3.3",
+        "@tailwindcss/vite": "^4.3.5",
         "@types/node": "^26.6.6",
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
-        "@types/vscode": "1.144.0",
+        "@types/vscode": "1.146.0",
         "@typescript/native": "npm:typescript@^7.0.2",
-        "@vitejs/plugin-react": "^6.1.2",
-        "@vscode/vsce": "^4.1.0",
+        "@vitejs/plugin-react": "^6.3.0",
+        "@vscode/vsce": "^4.1.1",
         "class-variance-authority": "^0.7.1",
-        "cn": "^0.5.1",
-        "concurrently": "^10.0.6",
+        "cn": "^0.5.2",
+        "concurrently": "^10.0.7",
         "esbuild": "^0.28.2",
-        "eslint": "^10.14.0",
+        "eslint": "^10.15.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-import-resolver-typescript": "^4.4.5",
-        "eslint-plugin-import-x": "^4.17.1",
+        "eslint-plugin-import-x": "^4.18.1",
         "eslint-plugin-react-hooks": "^7.1.1",
-        "eslint-plugin-react-refresh": "^0.5.7",
-        "globals": "^17.13.0",
-        "lucide-react": "^1.65.0",
-        "prettier": "^3.9.10",
+        "eslint-plugin-react-refresh": "^0.5.8",
+        "globals": "^17.14.0",
+        "lucide-react": "^1.75.0",
+        "prettier": "^3.10.1",
         "radix-ui": "^1.8.1",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
         "sonner": "^2.0.8",
-        "tailwindcss": "^4.3.3",
+        "tailwindcss": "^4.3.5",
         "tw-animate-css": "^1.4.0",
         "typescript": "npm:@typescript/typescript6@^6.0.2",
-        "typescript-eslint": "^8.72.1",
-        "vite": "^8.3.5"
+        "typescript-eslint": "^8.73.0",
+        "vite": "^8.3.8"
     }
 }

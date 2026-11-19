@@ -18,7 +18,7 @@ export interface UpdateSettings {
 
 /** 把扩展设置读成更新配置；默认值只在本文件出现一次 */
 export function resolveUpdateSettings(): UpdateSettings {
-    const config = vscode.workspace.getConfiguration('baiwanyi.prompt')
+    const config = vscode.workspace.getConfiguration('codeshortcuts.prompt')
     return {
         manifestUrl: config.get<string>('update.manifestUrl', DEFAULT_MANIFEST_URL).trim(),
         checkOnStartup: config.get<boolean>('update.checkOnStartup', false),
