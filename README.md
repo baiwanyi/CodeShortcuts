@@ -30,7 +30,7 @@
 
 | 依赖 | 版本 | 说明 |
 | --- | --- | --- |
-| VS Code | 1.144.0 或更高 | 清单 `engines.vscode` 的声明 |
+| VS Code | 1.146.0 或更高 | 清单 `engines.vscode` 的声明 |
 | Node.js | 22.13+ 或 24+ | 由当前依赖推导（vsce、concurrently、ESLint、Vite），清单未显式声明；扩展产物以 `node20` 为目标 |
 | pnpm | 12 | `pnpm-workspace.yaml` 按 pnpm 12 配置安装脚本白名单，清单未声明 `packageManager` |
 
