@@ -21,12 +21,12 @@ interface BookmarkListProps {
 
 export function BookmarkList({ bookmarks, onOpen, onEdit, onDelete }: BookmarkListProps): JSX.Element {
     return (
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <div className="flex h-9 shrink-0 items-center gap-1.5 px-3">
                 <span className="font-semibold">我的收藏</span>
                 <Badge variant="secondary">{bookmarks.length}</Badge>
             </div>
-            <ScrollArea className="min-h-0 flex-1 p-3">
+            <ScrollArea className="min-h-0 min-w-0 flex-1 p-3">
                 {bookmarks.length === 0 ? (
                     <Empty className="gap-2 py-8">
                         <EmptyHeader>

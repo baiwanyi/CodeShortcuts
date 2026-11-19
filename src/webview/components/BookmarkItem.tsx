@@ -4,6 +4,8 @@
  * 编辑与删除放在「更多」菜单里，由列表注入回调；网址以说明文字常显，便于打开前确认目标。
  * 注意：Radix 打开菜单时会阻止 pointerdown 的默认行为，紧随其后的 click 可能落到整行容器上；
  * 菜单开合刷新时间戳并在保护窗口内吞掉整行点击，触发按钮自身也阻止冒泡，双重避免误开浏览器。
+ * 布局上标题基类为 w-fit、整行基类为 flex-wrap，长网址会把内容顶出侧边栏；这里覆盖为定宽且不换行，
+ * 并让网址省略号在收缩后的宽度内生效。
  */
 import { cn } from 'cn'
 import { ChevronRight, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
@@ -55,7 +57,7 @@ export function BookmarkItem({ bookmark, onOpen, onEdit, onDelete }: BookmarkIte
     }
 
     return (
-        <Item variant="outline" className="cursor-pointer hover:bg-accent" onClick={handleRowClick}>
+        <Item variant="outline" className="min-w-0 flex-nowrap cursor-pointer hover:bg-accent" onClick={handleRowClick}>
             <ItemMedia
                 variant="image"
                 className={cn(
@@ -65,13 +67,13 @@ export function BookmarkItem({ bookmark, onOpen, onEdit, onDelete }: BookmarkIte
             >
                 <Icon className="size-5" />
             </ItemMedia>
-            <ItemContent className="min-w-0">
-                <ItemTitle className="min-w-0">
+            <ItemContent className="min-w-0 flex-1">
+                <ItemTitle className="w-full min-w-0">
                     <span className="truncate">{bookmark.label}</span>
                 </ItemTitle>
-                <ItemDescription className="truncate text-xs">{bookmark.url}</ItemDescription>
+                <ItemDescription className="w-full min-w-0 truncate text-xs">{bookmark.url}</ItemDescription>
             </ItemContent>
-            <ItemActions onClick={(event): void => event.stopPropagation()}>
+            <ItemActions className="shrink-0" onClick={(event): void => event.stopPropagation()}>
                 <DropdownMenu onOpenChange={handleMenuOpenChange}>
                     <DropdownMenuTrigger asChild>
                         <Button

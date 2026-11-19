@@ -1,7 +1,9 @@
 /**
  * 自定义滚动容器（shadcn registry 官方实现）。
  * 滚动条样式与 Viewport 由组件内部维护，调用方只需控制容器高度。
- * 注意：容器必须有确定高度（父级 flex-1 + min-h-0），否则不会产生内部滚动。
+ * 注意：容器必须有确定高度（父级 flex-1 + min-h-0），否则不会产生内部滚动；
+ * Radix 内容层默认按内容最大宽度铺开，长文本会把整行顶出视口，这里把内容层固定为视口宽度，
+ * 让条目的 w-full 与 truncate 在可用宽度内生效，纵向高度仍由内容决定、不影响滚动测量。
  */
 import * as React from 'react'
 import { cn } from 'cn'
@@ -12,7 +14,7 @@ function ScrollArea({ className, children, ...props }: React.ComponentProps<type
         <ScrollAreaPrimitive.Root data-slot="scroll-area" className={cn('relative', className)} {...props}>
             <ScrollAreaPrimitive.Viewport
                 data-slot="scroll-area-viewport"
-                className="size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"
+                className="size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 [&>div]:block! [&>div]:min-w-0! [&>div]:w-full!"
             >
                 {children}
             </ScrollAreaPrimitive.Viewport>
