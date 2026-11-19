@@ -1,6 +1,6 @@
 {
     "$schema": "https://json.schemastore.org/package.json",
-    "name": "codeshortcuts",
+    "name": "codeshortcuts4vscode",
     "displayName": "CodeShortcuts for VSCode",
     "description": "把常用提示词送达 CodeBuddy，把收藏网址与开发命令收进侧边栏",
     "version": "0.1.5",
